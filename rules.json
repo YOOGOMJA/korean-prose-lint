@@ -27,6 +27,19 @@
         "문장 부호 다음 문자가 한글이 아니면 검사하지 않는다."
       ],
       "fix_safety": "none"
+    },
+    {
+      "id": "KoreanProse.RepeatedPunctuation",
+      "summary": "느낌표와 물음표가 연속된 반복 강조를 탐지한다.",
+      "rationale": "반복 문장 부호를 줄이면 기술 산문의 어조가 차분하고 명확해진다.",
+      "scope": ["prose", "heading"],
+      "default_severity": "suggestion",
+      "exceptions": [
+        "단일 느낌표와 물음표는 검사하지 않는다.",
+        "코드는 검사하지 않는다.",
+        "URL은 검사하지 않는다."
+      ],
+      "fix_safety": "none"
     }
   ]
 }
