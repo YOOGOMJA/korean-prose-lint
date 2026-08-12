@@ -2,6 +2,8 @@
 
 [English](README.en.md)
 
+[![Vale 3.17.1 supported](https://img.shields.io/badge/Vale-3.17.1%20supported-4c8eda)](https://github.com/vale-cli/vale/releases/tag/v3.17.1)
+
 `korean-prose-lint`는 명료하고 일관된 한국어 산문을 위한 결정론적 스타일 린터입니다.
 한국어 맞춤법·문법 전체를 검사하거나 문서를 포맷하거나 AI가 문장을 다시 쓰게 하는
 도구가 아니라 ESLint·markdownlint에 가까운 도구입니다.

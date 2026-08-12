@@ -2,6 +2,8 @@
 
 [한국어](README.md)
 
+[![Vale 3.17.1 supported](https://img.shields.io/badge/Vale-3.17.1%20supported-4c8eda)](https://github.com/vale-cli/vale/releases/tag/v3.17.1)
+
 `korean-prose-lint` is a deterministic style linter for clear, consistent
 Korean prose. It is closer to ESLint or markdownlint than a complete Korean
 spelling and grammar checker, formatter, or AI rewriting prompt.
