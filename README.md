@@ -1,37 +1,35 @@
 # korean-prose-lint
 
-[한국어](README.ko.md)
+[English](README.md)
 
-`korean-prose-lint` is a deterministic style linter for clear, consistent
-Korean prose. It is closer to ESLint or markdownlint than a complete Korean
-spelling and grammar checker, formatter, or AI rewriting prompt.
+`korean-prose-lint`는 명료하고 일관된 한국어 산문을 위한 결정론적 스타일 린터입니다.
+한국어 맞춤법·문법 전체를 검사하거나 문서를 포맷하거나 AI가 문장을 다시 쓰게 하는
+도구가 아니라 ESLint·markdownlint에 가까운 도구입니다.
 
-The initial release provides a `KoreanProse` [Vale](https://vale.sh/) style
-package and a small Agent Skill that runs Vale and interprets its JSON output.
-Vale 3.17.1 is the supported and CI-pinned baseline.
+첫 릴리스는 [Vale](https://vale.sh/)에서 실행하는 `KoreanProse` style package와 Vale의
+JSON 결과를 해석하는 작은 Agent Skill을 제공합니다. 지원 및 CI 고정 기준은 Vale
+3.17.1입니다.
 
-## Install
+## 설치
 
-1. Install [Vale 3.17.1](https://github.com/vale-cli/vale/releases/tag/v3.17.1)
-   and confirm the version:
+1. [Vale 3.17.1](https://github.com/vale-cli/vale/releases/tag/v3.17.1)을 설치하고
+   버전을 확인합니다.
 
    ```console
    vale --version
    ```
 
-   The supported output is `vale version 3.17.1`. Other versions may run, but
-   are best-effort and should be compared with the 3.17.1 fixture behavior when
-   results differ.
+   지원하는 출력은 `vale version 3.17.1`입니다. 다른 버전에서도 실행할 수 있지만
+   best-effort이며, 결과가 다르면 3.17.1 fixture 행동을 기준으로 비교해야 합니다.
 
-2. Copy the `KoreanProse/` directory into a local styles directory:
+2. `KoreanProse/` 디렉터리를 사용할 저장소의 style 디렉터리로 복사합니다.
 
    ```console
    mkdir -p styles
    cp -R /path/to/korean-prose-lint/KoreanProse styles/KoreanProse
    ```
 
-3. Add this supported consumer profile as `.vale.ini` in the repository to
-   lint:
+3. 검사할 저장소의 `.vale.ini`에 다음 지원 consumer profile을 작성합니다.
 
    ```ini
    StylesPath = styles
@@ -42,37 +40,36 @@ Vale 3.17.1 is the supported and CI-pinned baseline.
    TokenIgnores = (?i)((?:https?://|www\.)[^\s<]+)
    ```
 
-The `TokenIgnores` entry is required. It preserves the rule contract for URL
-boundaries that Vale rule YAML cannot configure by itself. A style-only setup
-without this profile is not a supported backend configuration.
+`TokenIgnores` 항목은 필수입니다. Vale rule YAML만으로 설정할 수 없는 URL 경계에서도
+규칙 계약을 보존합니다. 이 profile 없이 style 폴더만 활성화한 실행은 지원하는 backend
+구성이 아닙니다.
 
-## Run
+## 실행
 
-Lint files or directories from the consumer repository root:
+consumer 저장소 루트에서 파일이나 디렉터리를 검사합니다.
 
 ```console
 vale --no-global --no-exit --output=JSON README.md docs/
 ```
 
-`--no-exit` keeps findings separate from backend failures. Do not interpret an
-empty output as clean unless Vale ran successfully and its JSON was decoded.
+`--no-exit`는 finding과 backend 실패를 구분하기 위해 사용합니다. Vale가 성공적으로
+실행되고 JSON을 해석한 경우에만 빈 결과를 위반 없음으로 판단해야 합니다.
 
-## Rules
+## 규칙
 
-| Rule ID | Default severity | Reports |
+| 규칙 ID | 기본 심각도 | 탐지 대상 |
 |---|---|---|
-| `KoreanProse.DoubleSpace` | warning | Runs of two or more ASCII U+0020 spaces between non-whitespace characters |
-| `KoreanProse.SentenceSpacing` | warning | No space between Korean sentence-ending punctuation and the next Hangul character |
-| `KoreanProse.RepeatedPunctuation` | suggestion | Runs of two or more `!` and `?` characters |
-| `KoreanProse.RedundantExpression` | suggestion | Three explicitly supported redundant-expression surface forms |
+| `KoreanProse.DoubleSpace` | warning | 비공백 문자 사이에서 ASCII U+0020 공백이 두 칸 이상 이어진 경우 |
+| `KoreanProse.SentenceSpacing` | warning | 한글 문장 종결 부호와 다음 한글 사이의 무공백 |
+| `KoreanProse.RepeatedPunctuation` | suggestion | `!`와 `?`가 두 개 이상 이어진 반복 강조 |
+| `KoreanProse.RedundantExpression` | suggestion | 명시적으로 지원하는 중복 표현 표면형 세 개 |
 
-Ordinary Markdown paragraphs, headings, and list items are checked. Code spans,
-fenced and indented code blocks, and URLs covered by the consumer profile are
-excluded. A horizontal tab is not a `DoubleSpace` finding. Inputs are expected
-to be UTF-8 with NFC Korean text. See [`rules.json`](rules.json) and each rule's
-fixtures for the exact behavior contract.
+일반 Markdown 문단, 제목과 목록 항목은 검사합니다. 인라인 코드, fenced·들여쓰기 코드
+블록과 consumer profile이 처리하는 URL은 검사하지 않습니다. 수평 tab은 `DoubleSpace`
+finding이 아닙니다. 입력은 UTF-8 NFC 한글을 전제로 합니다. 정확한 행동 계약은
+[`rules.json`](rules.json)과 각 규칙의 fixture를 참고하세요.
 
-Vale supports rule-specific configuration after `BasedOnStyles`:
+Vale 설정에서 개별 규칙의 심각도나 활성 상태를 바꿀 수 있습니다.
 
 ```ini
 [*.md]
@@ -83,44 +80,42 @@ KoreanProse.DoubleSpace = suggestion
 KoreanProse.RedundantExpression = NO
 ```
 
-`KoreanProse = error` changes the whole style first; the following rule-specific
-entries override or disable individual rules.
+`KoreanProse = error`는 먼저 style 전체의 심각도를 바꾸며, 뒤의 규칙별 항목은 개별
+규칙을 다시 override하거나 비활성화합니다.
 
-These overrides are Vale configuration features; the cross-backend v0.1
-conformance contract compares the catalog defaults.
+이 override는 Vale 설정 기능입니다. backend 간 v0.1 적합성 계약은 catalog의 기본값을
+비교합니다.
 
 ## Agent Skill
 
-Copy [`skills/korean-prose-lint/`](skills/korean-prose-lint/) into a skill
-directory supported by your agent, then ask the agent to lint Korean prose with
-`korean-prose-lint`. The Skill is an adapter, not a second lint engine: Vale and
-the supported consumer profile are still required.
+[`skills/korean-prose-lint/`](skills/korean-prose-lint/)를 사용하는 에이전트가 지원하는
+skill 디렉터리에 복사한 뒤 `korean-prose-lint`로 한국어 산문을 검사해 달라고 요청합니다.
+Skill은 두 번째 lint engine이 아니라 adapter이므로 Vale와 지원 consumer profile이 계속
+필요합니다.
 
-The Skill distinguishes these outcomes:
+Skill은 결과를 다음처럼 구분합니다.
 
-- `completed`: Vale ran and JSON decoding succeeded. Zero findings means the
-  checked inputs had no reported violations.
-- `not_run/backend_unavailable`: Vale was unavailable, so no lint occurred.
-- `failed`: configuration, input, backend, or normalization prevented a
-  trustworthy result.
+- `completed`: Vale 실행과 JSON 해석이 끝났습니다. finding 0건은 검사한 입력에 보고된
+  위반이 없다는 뜻입니다.
+- `not_run/backend_unavailable`: Vale를 사용할 수 없어 lint를 실행하지 못했습니다.
+- `failed`: 설정·입력·backend·정규화 문제로 신뢰할 수 있는 결과를 만들지 못했습니다.
 
-It does not install Vale, imitate the rules with an LLM, rewrite files, or apply
-automatic fixes.
+Skill은 Vale를 자동 설치하거나 LLM으로 규칙을 흉내 내거나 파일을 재작성하거나 자동
+수정을 적용하지 않습니다.
 
-## Scope
+## 범위
 
-The current release targets technical documentation, README files, and GitHub
-issue or pull-request prose. It does not provide comprehensive spelling or
-grammar checking, morphological analysis, a standalone CLI, a native backend,
-editor plugins, or Package Explorer distribution.
+현재 릴리스는 기술 문서, README, GitHub 이슈와 PR 산문을 대상으로 합니다. 맞춤법·문법
+전체 검사, 형태소 분석, 독자 CLI, native backend, 에디터 플러그인과 Package Explorer
+배포는 제공하지 않습니다.
 
-## Development
+## 개발
 
-Run the conformance suite with Vale 3.17.1:
+Vale 3.17.1로 적합성 테스트를 실행합니다.
 
 ```console
 VALE_BIN=/path/to/vale go test ./...
 ```
 
-The Go code is a test harness only. Public terminology is defined in the
-[domain language glossary](docs/domain-language.md).
+Go 코드는 테스트 harness일 뿐 제품 CLI가 아닙니다. 공개 용어의 정본은
+[도메인 언어 사전](docs/domain-language.md)입니다.
