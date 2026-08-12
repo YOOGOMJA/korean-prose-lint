@@ -1,0 +1,6 @@
+extends: existence
+message: "중복 표현을 간결하게 다듬어 보세요: '%s'"
+level: suggestion
+nonword: true
+tokens:
+  - '(?<!\p{Hangul})(?:미리 사전에|다시 재시도합니다|다시 재시도)(?!\p{Hangul})'
