@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install Vale 3.17.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          vale_dir="$RUNNER_TEMP/vale-3.17.1"
+          mkdir -p "$vale_dir"
+          curl -fsSL -o "$vale_dir/vale_3.17.1_checksums.txt" \
+            https://github.com/vale-cli/vale/releases/download/v3.17.1/vale_3.17.1_checksums.txt
+          curl -fsSL -o "$vale_dir/vale_3.17.1_Linux_64-bit.tar.gz" \
+            https://github.com/vale-cli/vale/releases/download/v3.17.1/vale_3.17.1_Linux_64-bit.tar.gz
+          grep 'vale_3.17.1_Linux_64-bit.tar.gz' "$vale_dir/vale_3.17.1_checksums.txt" \
+            | (cd "$vale_dir" && sha256sum --check -)
+          tar -xzf "$vale_dir/vale_3.17.1_Linux_64-bit.tar.gz" -C "$vale_dir"
+          echo "$vale_dir" >> "$GITHUB_PATH"
+
+      - name: Verify Vale version
+        run: vale --version
+
+      - name: Run conformance tests
+        run: go test ./...

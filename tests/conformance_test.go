@@ -201,6 +201,22 @@ func loadRuleCatalog(t *testing.T, root string) ruleCatalog {
 	return catalog
 }
 
+func loadExpectationManifest(t *testing.T, path string) expectationManifest {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := parseExpectationManifest(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(manifest.Cases) == 0 {
+		t.Fatal("expectation manifest has no cases")
+	}
+	return manifest
+}
+
 func validateRuleCatalog(t *testing.T, catalog ruleCatalog) {
 	t.Helper()
 	if err := validateRuleCatalogValue(catalog); err != nil {
@@ -292,9 +308,47 @@ func verifyValeVersion(t *testing.T, valePath string) {
 	if err != nil {
 		t.Fatalf("run Vale version: %v: %s", err, output)
 	}
-	if !strings.Contains(string(output), "vale version 3.17.1") {
+	if err := validateValeVersionOutput(string(output)); err != nil {
 		t.Fatalf("unsupported Vale version: %s", output)
 	}
+}
+
+func validateValeVersionOutput(output string) error {
+	if strings.TrimSpace(output) != "vale version 3.17.1" {
+		return fmt.Errorf("unsupported Vale version: %q", strings.TrimSpace(output))
+	}
+	return nil
+}
+
+func validateStyleRuleFiles(root string, catalog ruleCatalog) error {
+	want := make(map[string]bool, len(catalog.Rules))
+	for _, rule := range catalog.Rules {
+		want[strings.TrimPrefix(rule.ID, "KoreanProse.")] = true
+	}
+
+	entries, err := os.ReadDir(filepath.Join(root, "KoreanProse"))
+	if err != nil {
+		return fmt.Errorf("read style directory: %w", err)
+	}
+	got := make(map[string]bool, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".yml" {
+			continue
+		}
+		got[strings.TrimSuffix(entry.Name(), ".yml")] = true
+	}
+
+	for name := range want {
+		if !got[name] {
+			return fmt.Errorf("catalog rule %q has no KoreanProse/%s.yml", name, name)
+		}
+	}
+	for name := range got {
+		if !want[name] {
+			return fmt.Errorf("KoreanProse/%s.yml has no rule catalog entry", name)
+		}
+	}
+	return nil
 }
 
 func runVale(t *testing.T, root, configPath, input string) []finding {
@@ -499,6 +553,33 @@ func TestValidateRuleCatalogRejectsInvalidRuleIDs(t *testing.T) {
 	}
 }
 
+func TestValidateValeVersionRejectsPrefixCollision(t *testing.T) {
+	if err := validateValeVersionOutput("vale version 3.17.10\n"); err == nil {
+		t.Fatal("accepted Vale 3.17.10 as pinned Vale 3.17.1")
+	}
+}
+
+func TestValidateStyleRuleFilesRejectsOrphanRule(t *testing.T) {
+	root := t.TempDir()
+	styleDirectory := filepath.Join(root, "KoreanProse")
+	if err := os.Mkdir(styleDirectory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"DoubleSpace.yml", "OrphanRule.yml"} {
+		file, err := os.Create(filepath.Join(styleDirectory, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := file.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	catalog := ruleCatalog{Rules: []ruleCatalogEntry{{ID: "KoreanProse.DoubleSpace"}}}
+	if err := validateStyleRuleFiles(root, catalog); err == nil {
+		t.Fatal("accepted a style rule absent from the rule catalog")
+	}
+}
+
 func TestValeConformance(t *testing.T) {
 	root := repositoryRoot(t)
 	catalog := loadRuleCatalog(t, root)
@@ -507,17 +588,7 @@ func TestValeConformance(t *testing.T) {
 		rule := rule
 		ruleName := strings.TrimPrefix(rule.ID, "KoreanProse.")
 		t.Run(ruleName, func(t *testing.T) {
-			manifestData, err := os.ReadFile(filepath.Join(root, "fixtures", ruleName, "expected.json"))
-			if err != nil {
-				t.Fatal(err)
-			}
-			manifest, err := parseExpectationManifest(manifestData)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if len(manifest.Cases) == 0 {
-				t.Fatal("expectation manifest has no cases")
-			}
+			manifest := loadExpectationManifest(t, filepath.Join(root, "fixtures", ruleName, "expected.json"))
 
 			configPath := filepath.ToSlash(filepath.Join("tests", "vale", ruleName, ".vale.ini"))
 			for _, testCase := range manifest.Cases {
@@ -535,5 +606,68 @@ func TestValeConformance(t *testing.T) {
 				})
 			}
 		})
+	}
+}
+
+func TestRuleCatalogCoverage(t *testing.T) {
+	root := repositoryRoot(t)
+	catalog := loadRuleCatalog(t, root)
+	if err := validateStyleRuleFiles(root, catalog); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, rule := range catalog.Rules {
+		rule := rule
+		ruleName := strings.TrimPrefix(rule.ID, "KoreanProse.")
+		t.Run(ruleName, func(t *testing.T) {
+			requiredFiles := []string{
+				filepath.Join("KoreanProse", ruleName+".yml"),
+				filepath.Join("fixtures", ruleName, "valid.md"),
+				filepath.Join("fixtures", ruleName, "invalid.md"),
+				filepath.Join("fixtures", ruleName, "expected.json"),
+				filepath.Join("tests", "vale", ruleName, ".vale.ini"),
+			}
+			for _, requiredFile := range requiredFiles {
+				info, err := os.Stat(filepath.Join(root, requiredFile))
+				if err != nil {
+					t.Fatalf("required file %s: %v", filepath.ToSlash(requiredFile), err)
+				}
+				if !info.Mode().IsRegular() {
+					t.Fatalf("required path is not a regular file: %s", filepath.ToSlash(requiredFile))
+				}
+			}
+
+			manifest := loadExpectationManifest(t, filepath.Join(root, "fixtures", ruleName, "expected.json"))
+			fixturePrefix := filepath.ToSlash(filepath.Join("fixtures", ruleName)) + "/"
+			for caseIndex, testCase := range manifest.Cases {
+				if !strings.HasPrefix(testCase.Input, fixturePrefix) {
+					t.Fatalf("cases[%d].input = %q, want path under %s", caseIndex, testCase.Input, fixturePrefix)
+				}
+				if err := validateInputPath(root, testCase.Input); err != nil {
+					t.Fatalf("cases[%d].input: %v", caseIndex, err)
+				}
+				for findingIndex, item := range testCase.Findings {
+					if item.RuleID != rule.ID {
+						t.Fatalf("cases[%d].findings[%d].rule_id = %q, want %q", caseIndex, findingIndex, item.RuleID, rule.ID)
+					}
+					if item.Severity != rule.DefaultSeverity {
+						t.Fatalf("cases[%d].findings[%d].severity = %q, want %q", caseIndex, findingIndex, item.Severity, rule.DefaultSeverity)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestAllRulesTogether(t *testing.T) {
+	root := repositoryRoot(t)
+	manifest := loadExpectationManifest(t, filepath.Join(root, "tests", "integration", "expected.json"))
+	if len(manifest.Cases) != 1 {
+		t.Fatalf("integration manifest has %d cases, want 1", len(manifest.Cases))
+	}
+	testCase := manifest.Cases[0]
+	got := runVale(t, root, ".vale.ini", testCase.Input)
+	if err := compareFindings(testCase.Findings, got); err != nil {
+		t.Fatal(err)
 	}
 }
