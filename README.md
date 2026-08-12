@@ -22,23 +22,26 @@ JSON 결과를 해석하는 작은 Agent Skill을 제공합니다. 지원 및 CI
    지원하는 출력은 `vale version 3.17.1`입니다. 다른 버전에서도 실행할 수 있지만
    best-effort이며, 결과가 다르면 3.17.1 fixture 행동을 기준으로 비교해야 합니다.
 
-2. `KoreanProse/` 디렉터리를 사용할 저장소의 style 디렉터리로 복사합니다.
-
-   ```console
-   mkdir -p styles
-   cp -R /path/to/korean-prose-lint/KoreanProse styles/KoreanProse
-   ```
-
-3. 검사할 저장소의 `.vale.ini`에 다음 지원 consumer profile을 작성합니다.
+2. 검사할 저장소 루트에 `.vale.ini`를 만들고, `<version>`을 사용할
+   `korean-prose-lint` release tag로 바꿉니다.
 
    ```ini
-   StylesPath = styles
-   MinAlertLevel = suggestion
+   StylesPath = .vale/styles
+   Packages = https://github.com/YOOGOMJA/korean-prose-lint/releases/download/<version>/KoreanProse.zip
 
    [*.md]
    BasedOnStyles = KoreanProse
    TokenIgnores = (?i)((?:https?://|www\.)[^\s<]+)
    ```
+
+3. Vale package를 동기화합니다.
+
+   ```console
+   vale sync
+   ```
+
+개발 중인 checkout이나 release 이전 commit을 사용해야 한다면 `KoreanProse/` 디렉터리를
+로컬 style 디렉터리로 복사하는 fallback도 사용할 수 있습니다.
 
 `TokenIgnores` 항목은 필수입니다. Vale rule YAML만으로 설정할 수 없는 URL 경계에서도
 규칙 계약을 보존합니다. 이 profile 없이 style 폴더만 활성화한 실행은 지원하는 backend

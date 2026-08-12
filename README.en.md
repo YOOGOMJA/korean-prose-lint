@@ -23,24 +23,26 @@ Vale 3.17.1 is the supported and CI-pinned baseline.
    are best-effort and should be compared with the 3.17.1 fixture behavior when
    results differ.
 
-2. Copy the `KoreanProse/` directory into a local styles directory:
-
-   ```console
-   mkdir -p styles
-   cp -R /path/to/korean-prose-lint/KoreanProse styles/KoreanProse
-   ```
-
-3. Add this supported consumer profile as `.vale.ini` in the repository to
-   lint:
+2. Create `.vale.ini` in the consumer repository root and replace `<version>`
+   with the `korean-prose-lint` release tag to use:
 
    ```ini
-   StylesPath = styles
-   MinAlertLevel = suggestion
+   StylesPath = .vale/styles
+   Packages = https://github.com/YOOGOMJA/korean-prose-lint/releases/download/<version>/KoreanProse.zip
 
    [*.md]
    BasedOnStyles = KoreanProse
    TokenIgnores = (?i)((?:https?://|www\.)[^\s<]+)
    ```
+
+3. Sync the Vale package:
+
+   ```console
+   vale sync
+   ```
+
+For a development checkout or a pre-release commit, you can still copy the
+`KoreanProse/` directory into a local styles directory as a fallback.
 
 The `TokenIgnores` entry is required. It preserves the rule contract for URL
 boundaries that Vale rule YAML cannot configure by itself. A style-only setup
