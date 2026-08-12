@@ -61,10 +61,10 @@ empty output as clean unless Vale ran successfully and its JSON was decoded.
 
 | Rule ID | Default severity | Reports |
 |---|---|---|
-| `KoreanProse.DoubleSpace` | warning | Runs of two or more ASCII U+0020 spaces between non-whitespace characters |
-| `KoreanProse.SentenceSpacing` | warning | No space between Korean sentence-ending punctuation and the next Hangul character |
-| `KoreanProse.RepeatedPunctuation` | suggestion | Runs of two or more `!` and `?` characters |
-| `KoreanProse.RedundantExpression` | suggestion | Three explicitly supported redundant-expression surface forms |
+| [`KoreanProse.DoubleSpace`](docs/rules.en.md#koreanprosedoublespace) | warning | Runs of two or more ASCII U+0020 spaces between non-whitespace characters |
+| [`KoreanProse.SentenceSpacing`](docs/rules.en.md#koreanprosesentencespacing) | warning | No space between Korean sentence-ending punctuation and the next Hangul character |
+| [`KoreanProse.RepeatedPunctuation`](docs/rules.en.md#koreanproserepeatedpunctuation) | suggestion | Runs of two or more `!` and `?` characters |
+| [`KoreanProse.RedundantExpression`](docs/rules.en.md#koreanproseredundantexpression) | suggestion | Three explicitly supported redundant-expression surface forms |
 
 Ordinary Markdown paragraphs, headings, and list items are checked. Code spans,
 fenced and indented code blocks, and URLs covered by the consumer profile are
@@ -88,6 +88,22 @@ entries override or disable individual rules.
 
 These overrides are Vale configuration features; the cross-backend v0.1
 conformance contract compares the catalog defaults.
+
+See the [rule guide](docs/rules.en.md) for per-rule examples and boundary cases.
+
+## GitHub Actions
+
+In a consumer repository, install Vale, make `KoreanProse/` and the supported
+`.vale.ini` profile available, then run the same command in a workflow:
+
+```yaml
+- name: Run Korean prose lint
+  run: vale --no-global --no-exit --output=JSON README.md docs/
+```
+
+This repository's [test workflow](.github/workflows/test.yml) is an example of
+package-side verification: it checksum-verifies Vale 3.17.1 and runs the full
+conformance suite.
 
 ## Agent Skill
 

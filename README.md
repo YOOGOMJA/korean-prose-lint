@@ -59,10 +59,10 @@ vale --no-global --no-exit --output=JSON README.md docs/
 
 | 규칙 ID | 기본 심각도 | 탐지 대상 |
 |---|---|---|
-| `KoreanProse.DoubleSpace` | warning | 비공백 문자 사이에서 ASCII U+0020 공백이 두 칸 이상 이어진 경우 |
-| `KoreanProse.SentenceSpacing` | warning | 한글 문장 종결 부호와 다음 한글 사이의 무공백 |
-| `KoreanProse.RepeatedPunctuation` | suggestion | `!`와 `?`가 두 개 이상 이어진 반복 강조 |
-| `KoreanProse.RedundantExpression` | suggestion | 명시적으로 지원하는 중복 표현 표면형 세 개 |
+| [`KoreanProse.DoubleSpace`](docs/rules.md#koreanprosedoublespace) | warning | 비공백 문자 사이에서 ASCII U+0020 공백이 두 칸 이상 이어진 경우 |
+| [`KoreanProse.SentenceSpacing`](docs/rules.md#koreanprosesentencespacing) | warning | 한글 문장 종결 부호와 다음 한글 사이의 무공백 |
+| [`KoreanProse.RepeatedPunctuation`](docs/rules.md#koreanproserepeatedpunctuation) | suggestion | `!`와 `?`가 두 개 이상 이어지는 반복 강조 |
+| [`KoreanProse.RedundantExpression`](docs/rules.md#koreanproseredundantexpression) | suggestion | 명시적으로 지원하는 중복 표현 표면형 세 개 |
 
 일반 Markdown 문단, 제목과 목록 항목은 검사합니다. 인라인 코드, fenced·들여쓰기 코드
 블록과 consumer profile이 처리하는 URL은 검사하지 않습니다. 수평 tab은 `DoubleSpace`
@@ -85,6 +85,22 @@ KoreanProse.RedundantExpression = NO
 
 이 override는 Vale 설정 기능입니다. backend 간 v0.1 적합성 계약은 catalog의 기본값을
 비교합니다.
+
+규칙별 정상·위반 예시와 경계 조건은 [규칙 안내](docs/rules.md)를 참고하세요.
+
+## GitHub Actions
+
+consumer 저장소의 workflow에서 Vale를 설치한 뒤, 이 저장소의 `KoreanProse/`와
+지원 `.vale.ini` profile을 검사 대상 저장소에 제공하고 다음 명령을 실행할 수
+있습니다.
+
+```yaml
+- name: Run Korean prose lint
+  run: vale --no-global --no-exit --output=JSON README.md docs/
+```
+
+이 프로젝트의 [test workflow](.github/workflows/test.yml)는 Vale 3.17.1을 checksum
+검증하고 전체 conformance suite를 실행하는 패키지 자체 검증 예시입니다.
 
 ## Agent Skill
 
