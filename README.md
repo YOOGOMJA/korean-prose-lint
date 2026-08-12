@@ -28,6 +28,7 @@ JSON 결과를 해석하는 작은 Agent Skill을 제공합니다. 지원 및 CI
    ```ini
    StylesPath = .vale/styles
    Packages = https://github.com/YOOGOMJA/korean-prose-lint/releases/download/<version>/KoreanProse.zip
+   MinAlertLevel = suggestion
 
    [*.md]
    BasedOnStyles = KoreanProse
@@ -43,9 +44,10 @@ JSON 결과를 해석하는 작은 Agent Skill을 제공합니다. 지원 및 CI
 개발 중인 checkout이나 release 이전 commit을 사용해야 한다면 `KoreanProse/` 디렉터리를
 로컬 style 디렉터리로 복사하는 fallback도 사용할 수 있습니다.
 
-`TokenIgnores` 항목은 필수입니다. Vale rule YAML만으로 설정할 수 없는 URL 경계에서도
-규칙 계약을 보존합니다. 이 profile 없이 style 폴더만 활성화한 실행은 지원하는 backend
-구성이 아닙니다.
+`MinAlertLevel = suggestion`과 `TokenIgnores` 항목은 필수입니다. 전자는 suggestion
+규칙을 결과에 포함하고, 후자는 Vale rule YAML만으로 설정할 수 없는 URL 경계에서도
+규칙 계약을 보존합니다. 이 profile 없이 style 폴더만 활성화한 실행은 지원하는
+backend 구성이 아닙니다.
 
 ## 실행
 

@@ -43,7 +43,9 @@ LLM-only review and call it a successful lint run.
    known to differ from the 3.17.1 fixture behavior, treat the 3.17.1 fixture as
    the compatibility reference and report the discrepancy.
 5. Confirm the active config includes the required KoreanProse consumer
-   profile, including its documented Markdown `TokenIgnores`. Use `vale
+   profile: `MinAlertLevel = suggestion`, `BasedOnStyles = KoreanProse`, and
+   the documented Markdown `TokenIgnores`. The alert threshold is required so
+   the two suggestion-level rules are not silently filtered out. Use `vale
    --config=<path> --no-global ls-config` when the effective configuration is
    uncertain.
 6. For files, execute from the repository root:

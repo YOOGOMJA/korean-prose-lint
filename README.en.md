@@ -29,6 +29,7 @@ Vale 3.17.1 is the supported and CI-pinned baseline.
    ```ini
    StylesPath = .vale/styles
    Packages = https://github.com/YOOGOMJA/korean-prose-lint/releases/download/<version>/KoreanProse.zip
+   MinAlertLevel = suggestion
 
    [*.md]
    BasedOnStyles = KoreanProse
@@ -44,9 +45,11 @@ Vale 3.17.1 is the supported and CI-pinned baseline.
 For a development checkout or a pre-release commit, you can still copy the
 `KoreanProse/` directory into a local styles directory as a fallback.
 
-The `TokenIgnores` entry is required. It preserves the rule contract for URL
-boundaries that Vale rule YAML cannot configure by itself. A style-only setup
-without this profile is not a supported backend configuration.
+`MinAlertLevel = suggestion` and the `TokenIgnores` entry are required. The
+threshold keeps suggestion-level rules in the result, while `TokenIgnores`
+preserves the rule contract for URL boundaries that Vale rule YAML cannot
+configure by itself. A style-only setup without this profile is not a supported
+backend configuration.
 
 ## Run
 
