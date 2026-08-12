@@ -1,0 +1,6 @@
+extends: existence
+message: "문장 부호 다음 한글을 띄어 쓰세요."
+level: warning
+nonword: true
+tokens:
+  - '(?<=\p{Hangul})[.!?](?=\p{Hangul})'

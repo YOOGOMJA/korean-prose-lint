@@ -1,0 +1,124 @@
+{
+  "cases": [
+    {
+      "input": "fixtures/RepeatedPunctuation/valid.md",
+      "findings": []
+    },
+    {
+      "input": "fixtures/RepeatedPunctuation/invalid.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 1,
+          "span_start": 3,
+          "span_end": 4,
+          "match": "!!"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 2,
+          "span_start": 3,
+          "span_end": 4,
+          "match": "??"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 3,
+          "span_start": 3,
+          "span_end": 4,
+          "match": "!?"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 4,
+          "span_start": 3,
+          "span_end": 4,
+          "match": "?!"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 5,
+          "span_start": 7,
+          "span_end": 8,
+          "match": "?!"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 6,
+          "span_start": 5,
+          "span_end": 7,
+          "match": "?!?"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 7,
+          "span_start": 9,
+          "span_end": 10,
+          "match": "??"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 8,
+          "span_start": 26,
+          "span_end": 27,
+          "match": "??"
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 9,
+          "span_start": 24,
+          "span_end": 25,
+          "match": "!?"
+        }
+      ]
+    },
+    {
+      "input": "fixtures/RepeatedPunctuation/after-inline-code.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 1,
+          "span_start": 9,
+          "span_end": 10,
+          "match": "??"
+        }
+      ]
+    },
+    {
+      "input": "fixtures/RepeatedPunctuation/after-url.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 1,
+          "span_start": 26,
+          "span_end": 27,
+          "match": "??"
+        }
+      ]
+    },
+    {
+      "input": "fixtures/RepeatedPunctuation/after-www-url.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 1,
+          "span_start": 24,
+          "span_end": 25,
+          "match": "!?"
+        }
+      ]
+    }
+  ]
+}

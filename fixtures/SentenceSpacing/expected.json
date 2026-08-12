@@ -1,0 +1,45 @@
+{
+  "cases": [
+    {
+      "input": "fixtures/SentenceSpacing/valid.md",
+      "findings": []
+    },
+    {
+      "input": "fixtures/SentenceSpacing/invalid.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.SentenceSpacing",
+          "severity": "warning",
+          "line": 1,
+          "span_start": 3,
+          "span_end": 3,
+          "match": "."
+        },
+        {
+          "rule_id": "KoreanProse.SentenceSpacing",
+          "severity": "warning",
+          "line": 2,
+          "span_start": 3,
+          "span_end": 3,
+          "match": "?"
+        },
+        {
+          "rule_id": "KoreanProse.SentenceSpacing",
+          "severity": "warning",
+          "line": 3,
+          "span_start": 3,
+          "span_end": 3,
+          "match": "!"
+        },
+        {
+          "rule_id": "KoreanProse.SentenceSpacing",
+          "severity": "warning",
+          "line": 4,
+          "span_start": 5,
+          "span_end": 5,
+          "match": "."
+        }
+      ]
+    }
+  ]
+}

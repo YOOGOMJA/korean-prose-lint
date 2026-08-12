@@ -1,0 +1,53 @@
+{
+  "cases": [
+    {
+      "input": "fixtures/RedundantExpression/valid.md",
+      "findings": []
+    },
+    {
+      "input": "fixtures/RedundantExpression/invalid.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 1,
+          "span_start": 1,
+          "span_end": 6,
+          "match": "미리 사전에"
+        },
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 2,
+          "span_start": 5,
+          "span_end": 10,
+          "match": "다시 재시도"
+        },
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 3,
+          "span_start": 1,
+          "span_end": 9,
+          "match": "다시 재시도합니다"
+        },
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 4,
+          "span_start": 2,
+          "span_end": 7,
+          "match": "미리 사전에"
+        },
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 5,
+          "span_start": 3,
+          "span_end": 8,
+          "match": "미리 사전에"
+        }
+      ]
+    }
+  ]
+}

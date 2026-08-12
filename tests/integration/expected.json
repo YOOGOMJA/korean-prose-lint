@@ -1,0 +1,41 @@
+{
+  "cases": [
+    {
+      "input": "tests/integration/all-rules.md",
+      "findings": [
+        {
+          "rule_id": "KoreanProse.DoubleSpace",
+          "severity": "warning",
+          "line": 1,
+          "span_start": 5,
+          "span_end": 6,
+          "match": "  "
+        },
+        {
+          "rule_id": "KoreanProse.SentenceSpacing",
+          "severity": "warning",
+          "line": 2,
+          "span_start": 3,
+          "span_end": 3,
+          "match": "."
+        },
+        {
+          "rule_id": "KoreanProse.RepeatedPunctuation",
+          "severity": "suggestion",
+          "line": 3,
+          "span_start": 3,
+          "span_end": 4,
+          "match": "!!"
+        },
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 4,
+          "span_start": 1,
+          "span_end": 6,
+          "match": "미리 사전에"
+        }
+      ]
+    }
+  ]
+}

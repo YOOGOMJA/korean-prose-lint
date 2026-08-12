@@ -1,0 +1,6 @@
+extends: existence
+message: "반복된 문장 부호를 하나로 줄여 보세요."
+level: suggestion
+nonword: true
+tokens:
+  - '[!?]{2,}'

@@ -1,0 +1,59 @@
+{
+  "contract_version": "0.1",
+  "rules": [
+    {
+      "id": "KoreanProse.DoubleSpace",
+      "summary": "산문 내부의 연속된 수평 공백을 탐지한다.",
+      "rationale": "의도하지 않은 연속 공백은 문서의 일관성과 가독성을 해친다.",
+      "scope": ["prose", "heading"],
+      "default_severity": "warning",
+      "exceptions": [
+        "Markdown 들여쓰기는 검사하지 않는다.",
+        "코드는 검사하지 않는다.",
+        "URL은 검사하지 않는다."
+      ],
+      "fix_safety": "none"
+    },
+    {
+      "id": "KoreanProse.SentenceSpacing",
+      "summary": "한글 문장 부호 뒤에 이어지는 한글의 무공백을 탐지한다.",
+      "rationale": "문장 경계를 띄어 쓰면 기술 산문의 구조와 가독성이 선명해진다.",
+      "scope": ["prose", "heading"],
+      "default_severity": "warning",
+      "exceptions": [
+        "소수와 버전 번호는 검사하지 않는다.",
+        "URL은 검사하지 않는다.",
+        "코드는 검사하지 않는다.",
+        "문장 부호 다음 문자가 한글이 아니면 검사하지 않는다."
+      ],
+      "fix_safety": "none"
+    },
+    {
+      "id": "KoreanProse.RepeatedPunctuation",
+      "summary": "느낌표와 물음표가 연속된 반복 강조를 탐지한다.",
+      "rationale": "반복 문장 부호를 줄이면 기술 산문의 어조가 차분하고 명확해진다.",
+      "scope": ["prose", "heading"],
+      "default_severity": "suggestion",
+      "exceptions": [
+        "단일 느낌표와 물음표는 검사하지 않는다.",
+        "코드는 검사하지 않는다.",
+        "URL은 검사하지 않는다."
+      ],
+      "fix_safety": "none"
+    },
+    {
+      "id": "KoreanProse.RedundantExpression",
+      "summary": "명시된 중복 표현의 닫힌 표면형을 탐지한다.",
+      "rationale": "뜻이 겹치는 표현을 줄이면 기술 산문이 간결해진다.",
+      "scope": ["prose", "heading"],
+      "default_severity": "suggestion",
+      "exceptions": [
+        "닫힌 표면형 목록에 없는 조사와 어미는 일반화하지 않는다.",
+        "좌우 한글에 결합된 부분 문자열은 검사하지 않는다.",
+        "코드는 검사하지 않는다.",
+        "URL은 검사하지 않는다."
+      ],
+      "fix_safety": "none"
+    }
+  ]
+}
