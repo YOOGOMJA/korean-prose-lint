@@ -1,0 +1,6 @@
+extends: existence
+message: "연속된 공백을 하나로 줄여 보세요."
+level: warning
+nonword: true
+tokens:
+  - '(?<=\S) {2,}(?=\S)'
