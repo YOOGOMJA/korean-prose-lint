@@ -38,6 +38,14 @@
           "span_start": 2,
           "span_end": 7,
           "match": "미리 사전에"
+        },
+        {
+          "rule_id": "KoreanProse.RedundantExpression",
+          "severity": "suggestion",
+          "line": 5,
+          "span_start": 3,
+          "span_end": 8,
+          "match": "미리 사전에"
         }
       ]
     }

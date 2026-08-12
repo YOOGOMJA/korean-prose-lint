@@ -75,7 +75,7 @@ func normalizeValeAlerts(data []byte, basePath string) ([]finding, error) {
 			return nil, fmt.Errorf("make Vale alert path relative: %w", err)
 		}
 		for _, alert := range alerts {
-			findings = append(findings, finding{
+			item := finding{
 				Path:      filepath.ToSlash(relativePath),
 				RuleID:    alert.Check,
 				Severity:  alert.Severity,
@@ -84,7 +84,11 @@ func normalizeValeAlerts(data []byte, basePath string) ([]finding, error) {
 				SpanStart: alert.Span[0],
 				SpanEnd:   alert.Span[1],
 				Match:     alert.Match,
-			})
+			}
+			if err := validateFindingValue(item); err != nil {
+				return nil, fmt.Errorf("normalize Vale alert: %w", err)
+			}
+			findings = append(findings, item)
 		}
 	}
 	return findings, nil
@@ -351,6 +355,95 @@ func validateStyleRuleFiles(root string, catalog ruleCatalog) error {
 	return nil
 }
 
+func validateV01RuleIDs(catalog ruleCatalog) error {
+	want := map[string]bool{
+		"KoreanProse.DoubleSpace":         true,
+		"KoreanProse.SentenceSpacing":     true,
+		"KoreanProse.RepeatedPunctuation": true,
+		"KoreanProse.RedundantExpression": true,
+	}
+	got := make(map[string]bool, len(catalog.Rules))
+	for _, rule := range catalog.Rules {
+		got[rule.ID] = true
+	}
+	for ruleID := range want {
+		if !got[ruleID] {
+			return fmt.Errorf("v0.1 rule catalog is missing %q", ruleID)
+		}
+	}
+	for ruleID := range got {
+		if !want[ruleID] {
+			return fmt.Errorf("v0.1 rule catalog contains unexpected %q", ruleID)
+		}
+	}
+	return nil
+}
+
+func validateFixtureCaseCoverage(root, ruleName string, manifest expectationManifest) error {
+	directory := filepath.Join(root, "fixtures", ruleName)
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		return fmt.Errorf("read fixture directory: %w", err)
+	}
+	fixturePaths := make(map[string]bool)
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+			fixturePaths[filepath.ToSlash(filepath.Join("fixtures", ruleName, entry.Name()))] = true
+		}
+	}
+	casePaths := make(map[string]bool, len(manifest.Cases))
+	for index, testCase := range manifest.Cases {
+		if casePaths[testCase.Input] {
+			return fmt.Errorf("cases[%d].input duplicates %q", index, testCase.Input)
+		}
+		casePaths[testCase.Input] = true
+	}
+	for path := range fixturePaths {
+		if !casePaths[path] {
+			return fmt.Errorf("fixture %q has no expectation manifest case", path)
+		}
+	}
+	for path := range casePaths {
+		if !fixturePaths[path] {
+			return fmt.Errorf("expectation manifest input %q is not a fixture Markdown file", path)
+		}
+	}
+	return nil
+}
+
+func validateFindingValue(item finding) error {
+	if item.Path == "" || item.RuleID == "" || item.Message == "" || item.Match == "" {
+		return fmt.Errorf("finding has an empty required field: %#v", item)
+	}
+	if item.Severity != "suggestion" && item.Severity != "warning" && item.Severity != "error" {
+		return fmt.Errorf("finding severity is unsupported: %q", item.Severity)
+	}
+	if item.Line < 1 || item.SpanStart < 1 || item.SpanEnd < item.SpanStart {
+		return fmt.Errorf("finding has invalid 1-based inclusive coordinates: %#v", item)
+	}
+	return nil
+}
+
+func validateFindingSource(root, input string, item finding) error {
+	data, err := os.ReadFile(filepath.Join(root, input))
+	if err != nil {
+		return fmt.Errorf("read finding input: %w", err)
+	}
+	lines := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
+	if item.Line > len(lines) {
+		return fmt.Errorf("finding line %d is outside %q", item.Line, input)
+	}
+	line := []rune(lines[item.Line-1])
+	if item.SpanEnd > len(line) {
+		return fmt.Errorf("finding span %d-%d is outside line %d", item.SpanStart, item.SpanEnd, item.Line)
+	}
+	matched := string(line[item.SpanStart-1 : item.SpanEnd])
+	if matched != item.Match {
+		return fmt.Errorf("finding match %q differs from source slice %q", item.Match, matched)
+	}
+	return nil
+}
+
 func runVale(t *testing.T, root, configPath, input string) []finding {
 	t.Helper()
 	if err := validateInputPath(root, input); err != nil {
@@ -367,6 +460,11 @@ func runVale(t *testing.T, root, configPath, input string) []finding {
 	findings, err := normalizeValeAlertsForInput(output, root, input)
 	if err != nil {
 		t.Fatal(err)
+	}
+	for _, item := range findings {
+		if err := validateFindingSource(root, input, item); err != nil {
+			t.Fatalf("normalization error: %v", err)
+		}
 	}
 	return findings
 }
@@ -580,6 +678,73 @@ func TestValidateStyleRuleFilesRejectsOrphanRule(t *testing.T) {
 	}
 }
 
+func TestValidateV01RuleIDsRejectsMissingRule(t *testing.T) {
+	catalog := ruleCatalog{ContractVersion: "0.1", Rules: []ruleCatalogEntry{{ID: "KoreanProse.DoubleSpace"}}}
+	if err := validateV01RuleIDs(catalog); err == nil {
+		t.Fatal("accepted an incomplete v0.1 rule set")
+	}
+}
+
+func TestValidateFixtureCaseCoverageRejectsOrphanFixture(t *testing.T) {
+	root := t.TempDir()
+	directory := filepath.Join(root, "fixtures", "DoubleSpace")
+	if err := os.MkdirAll(directory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"valid.md", "invalid.md", "orphan.md"} {
+		if err := os.WriteFile(filepath.Join(directory, name), []byte("fixture"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	manifest := expectationManifest{Cases: []expectationCase{
+		{Input: "fixtures/DoubleSpace/valid.md"},
+		{Input: "fixtures/DoubleSpace/invalid.md"},
+	}}
+	if err := validateFixtureCaseCoverage(root, "DoubleSpace", manifest); err == nil {
+		t.Fatal("accepted a fixture absent from the expectation manifest")
+	}
+}
+
+func TestValidateFindingValueRejectsInvalidFields(t *testing.T) {
+	valid := finding{Path: "input.md", RuleID: "KoreanProse.DoubleSpace", Severity: "warning", Message: "message", Line: 1, SpanStart: 1, SpanEnd: 2, Match: "  "}
+	tests := map[string]func(*finding){
+		"empty path":       func(item *finding) { item.Path = "" },
+		"empty rule ID":    func(item *finding) { item.RuleID = "" },
+		"invalid severity": func(item *finding) { item.Severity = "fatal" },
+		"empty message":    func(item *finding) { item.Message = "" },
+		"zero line":        func(item *finding) { item.Line = 0 },
+		"zero span start":  func(item *finding) { item.SpanStart = 0 },
+		"reversed span":    func(item *finding) { item.SpanEnd = 0 },
+		"empty match":      func(item *finding) { item.Match = "" },
+	}
+	for name, mutate := range tests {
+		t.Run(name, func(t *testing.T) {
+			invalid := valid
+			mutate(&invalid)
+			if err := validateFindingValue(invalid); err == nil {
+				t.Fatalf("accepted finding with %s", name)
+			}
+		})
+	}
+}
+
+func TestValidateFindingSourceChecksUnicodeSpan(t *testing.T) {
+	root := t.TempDir()
+	input := "input.md"
+	if err := os.WriteFile(filepath.Join(root, input), []byte("한글  문장\r\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	valid := finding{Path: input, RuleID: "KoreanProse.DoubleSpace", Severity: "warning", Message: "message", Line: 1, SpanStart: 3, SpanEnd: 4, Match: "  "}
+	if err := validateFindingSource(root, input, valid); err != nil {
+		t.Fatalf("rejected matching Unicode source span: %v", err)
+	}
+	invalid := valid
+	invalid.Match = "한글"
+	if err := validateFindingSource(root, input, invalid); err == nil {
+		t.Fatal("accepted match that differs from the inclusive source span")
+	}
+}
+
 func TestValeConformance(t *testing.T) {
 	root := repositoryRoot(t)
 	catalog := loadRuleCatalog(t, root)
@@ -612,6 +777,9 @@ func TestValeConformance(t *testing.T) {
 func TestRuleCatalogCoverage(t *testing.T) {
 	root := repositoryRoot(t)
 	catalog := loadRuleCatalog(t, root)
+	if err := validateV01RuleIDs(catalog); err != nil {
+		t.Fatal(err)
+	}
 	if err := validateStyleRuleFiles(root, catalog); err != nil {
 		t.Fatal(err)
 	}
@@ -638,6 +806,9 @@ func TestRuleCatalogCoverage(t *testing.T) {
 			}
 
 			manifest := loadExpectationManifest(t, filepath.Join(root, "fixtures", ruleName, "expected.json"))
+			if err := validateFixtureCaseCoverage(root, ruleName, manifest); err != nil {
+				t.Fatal(err)
+			}
 			fixturePrefix := filepath.ToSlash(filepath.Join("fixtures", ruleName)) + "/"
 			for caseIndex, testCase := range manifest.Cases {
 				if !strings.HasPrefix(testCase.Input, fixturePrefix) {
