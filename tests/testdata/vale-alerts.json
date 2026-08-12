@@ -1,0 +1,20 @@
+{
+  "/workspace/docs/예시.md": [
+    {
+      "Check": "KoreanProse.DoubleSpace",
+      "Severity": "warning",
+      "Message": "연속된 공백을 하나로 줄여 보세요.",
+      "Line": 2,
+      "Span": [4, 5],
+      "Match": "  "
+    },
+    {
+      "Check": "KoreanProse.RepeatedPunctuation",
+      "Severity": "suggestion",
+      "Message": "반복된 문장 부호를 하나로 줄여 보세요.",
+      "Line": 4,
+      "Span": [8, 9],
+      "Match": "!!"
+    }
+  ]
+}
