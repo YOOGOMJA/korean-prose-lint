@@ -1,6 +1,6 @@
 # korean-prose-lint
 
-[한국어](README.ko.md)
+[한국어](README.md)
 
 `korean-prose-lint` is a deterministic style linter for clear, consistent
 Korean prose. It is closer to ESLint or markdownlint than a complete Korean

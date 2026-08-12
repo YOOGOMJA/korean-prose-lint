@@ -1,6 +1,6 @@
 # korean-prose-lint
 
-[English](README.md)
+[English](README.en.md)
 
 `korean-prose-lint`는 명료하고 일관된 한국어 산문을 위한 결정론적 스타일 린터입니다.
 한국어 맞춤법·문법 전체를 검사하거나 문서를 포맷하거나 AI가 문장을 다시 쓰게 하는
